@@ -1,0 +1,67 @@
+name: Publish Docker Image to Registry and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: build Node.js Docker Image and Deploy to minikube
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Docker image
+        run: docker build -t chat-app .
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker tag chat-app ${{ secrets.DOCKER_USERNAME }}/chat-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/chat-app:${{ github.sha }}
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: Check for Clusters
+        run: kubectl get pods -A
+
+      - name: Deploy to Minikube
+        run: kubectl apply -f deployment.yml
+
+      - name: Check for Deployements and Services
+        run: |
+          kubectl get deployments
+          kubectl get pods
+          kubectl get svc
+
+      - name: Wait for deployments to be ready
+        run: |
+          while [[ $(kubectl get deployments --output 'jsonpath={.items[*].status.readyReplicas}' | tr ' ' '\n' | paste -sd+ | bc) -ne 1 ]]; do
+            echo "Waiting for deployments to be ready..."
+            sleep 10
+          done
+
+      - name: Apply Service
+        run: kubectl apply -f service.yml
+
+      - name: Test Service URLs
+        run: |
+          minikube service list
+          minikube service service-nodeapp --url
+
+      - name: Check for Deployements and Services
+        run: |
+          kubectl get deployments
+          kubectl get pods
+          kubectl get svc
