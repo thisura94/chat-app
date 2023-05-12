@@ -1,1 +1,2 @@
 "This comment is changed"
+"added a new text"
