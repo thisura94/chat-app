@@ -1,3 +1,2 @@
 "This comment is changed"
-"added a new text"
-"adding a lest change"
+"Applying a change"

@@ -1,7 +1,5 @@
 /**
- *  The `dotenv` module is used to load environment variables from a `.env` file into `process.env` object, which can be accessed throughout the application.
- * The `express` module is a popular Node.js web framework used for building web applications and APIs. 
- * The `app` object is an instance of the `express` application that is used to define routes and middleware for the application.
+ *  #importing the .wnv files and express to handle https requests
  * */
 require('dotenv').config();
 const express = require('express');
@@ -44,7 +42,8 @@ const Response = mongoose.model("Response", responseSchema);
  * The function creates and saves an API response and returns the saved data.
  * @param apiResponse - It is an object that represents the response received from an API call. The function takes this object and saves it to a database using the `.save()` method.
  * @returns The function `createAndSaveResponse` is returning a promise that resolves to the saved data if the save operation is successful, or rejects with an error if the save operation fails.
- * */
+ * */ 
+// save the response coming from openai api//
 const createAndSaveResponse = (apiResponse) => {
     return apiResponse.save()
         .then((savedData) => {
